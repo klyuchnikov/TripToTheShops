@@ -42,7 +42,7 @@ namespace TripToTheShops
         {
             get
             {
-               return Shops.SelectMany(q => q.Products).ToArray();
+                return Shops.SelectMany(q => q.Products).Distinct(new ProductComparer()).ToArray();
             }
         }
 
