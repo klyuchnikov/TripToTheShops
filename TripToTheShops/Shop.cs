@@ -26,7 +26,7 @@ namespace TripToTheShops
         /// <summary>
         /// Список продаваемых продуктов (private)
         /// </summary>
-        private List<Product> products;
+        private List<Product> products = new List<Product>();
 
         /// <summary>
         /// Список продаваемых продуктов
