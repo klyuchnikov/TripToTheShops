@@ -38,7 +38,6 @@ namespace TripToTheShops
             globalGrid.DataContext = Model.Current;
             globalGrid.UpdateLayout();
             PaintShopsToCanvas();
-
         }
 
         private void PaintShopsToCanvas()
@@ -81,6 +80,25 @@ namespace TripToTheShops
             Canvas.SetTop(imageHome, min);
             canvas1.Children.Add(imageHome);
             canvas1.UpdateLayout();
+        }
+
+        private void button2_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedProducts = listShops.SelectedItems.OfType<Product>().ToArray();
+            if (selectedProducts.Length == 0)
+            {
+                MessageBox.Show("Select products!");
+                return;
+            }
+            var listProducts = new Dictionary<string, List<Product>>();
+            foreach (var p in selectedProducts)
+            {
+                var prod = Model.Current.Shops.SelectMany(q => q.Products).Where(a => a.Code == p.Code).OrderBy(q => q.Price).First();
+                if (listProducts.ContainsKey(prod.Shop.ID))
+                    listProducts[prod.Shop.ID].Add(prod);
+                else
+                    listProducts.Add(prod.Shop.ID, new List<Product>(new[] { prod }));
+            }
         }
     }
 }
