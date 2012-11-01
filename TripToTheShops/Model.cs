@@ -38,6 +38,14 @@ namespace TripToTheShops
 
         public ShoppingList ShoppingList { get; private set; }
 
+        public Product[] AllProducts
+        {
+            get
+            {
+               return Shops.SelectMany(q => q.Products).ToArray();
+            }
+        }
+
         /// <summary>
         /// Log (private)
         /// </summary>
@@ -67,12 +75,15 @@ namespace TripToTheShops
         /// </summary>
         /// <param name="doc">XML документ</param>
         /// <returns>Загружен ли список магазинов</returns>
-        public bool LoadShops(XDocument doc)
+        public bool LoadShops(string path)
         {
             try
             {
-                var shopsXML = doc.Root.Elements("shop");
+                var doc = XDocument.Load(path);
+                var shopsXML = doc.Root.Elements("shop").ToArray();
                 var shops = new List<Shop>();
+                if (shopsXML.Length == 0)
+                    throw new FileLoadException("Error read file.");
                 foreach (var shopXML in shopsXML)
                 {
                     var id = shopXML.Attribute("id").Value;
@@ -101,6 +112,7 @@ namespace TripToTheShops
             catch (Exception e)
             {
                 AddLog(e.Message);
+                this.Shops = new Shop[]{};
                 IsLoadShops = false;
                 return false;
             }
@@ -116,10 +128,11 @@ namespace TripToTheShops
         /// </summary>
         /// <param name="doc">XML документ</param>
         /// <returns>Загружен ли список покупок</returns>
-        public bool LoadShoppingList(XDocument doc)
+        public bool LoadShoppingList(string path)
         {
             try
             {
+                var doc = XDocument.Load(path);
                 var coordinatesXML = doc.Root.Element("coordinates");
                 Point coordinates = new Point(double.Parse(coordinatesXML.Attribute("x").Value.Replace('.', ',')), double.Parse(coordinatesXML.Attribute("y").Value.Replace('.', ',')));
                 ParameterShopping op = ParameterShopping.Cost;
@@ -138,6 +151,7 @@ namespace TripToTheShops
             catch (Exception e)
             {
                 AddLog(e.Message);
+                this.ShoppingList = null;
                 IsLoadShoppingList = false;
                 return false;
             }

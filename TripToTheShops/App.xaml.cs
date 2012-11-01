@@ -20,8 +20,7 @@ namespace TripToTheShops
             {
                 if (File.Exists(e.Args[0]))
                 {
-                    var doc = XDocument.Load(e.Args[0]);
-                    if (Model.Current.LoadShops(doc))
+                    if (Model.Current.LoadShops(e.Args[0]))
                         Model.Current.AddLog("Load shops is successful.");
                     else
                         Model.Current.AddLog("Load shops is failed.");
@@ -31,8 +30,7 @@ namespace TripToTheShops
                 if (e.Args.Length > 1)
                     if (File.Exists(e.Args[1]))
                     {
-                        var doc = XDocument.Load(e.Args[1]);
-                        if (Model.Current.LoadShoppingList(doc))
+                        if (Model.Current.LoadShoppingList(e.Args[1]))
                             Model.Current.AddLog("Load shoppingList is successful.");
                         else
                             Model.Current.AddLog("Load shoppingList is failed.");
