@@ -52,11 +52,17 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Canvas Grid.Column="1"
-                Grid.Row="2"
-                Name="canvas1"
-                Background="WhiteSmoke">
-        </Canvas>
+        <ScrollViewer Grid.Column="1"
+                      Grid.Row="2"
+                      Name="scrollViewer1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
+            <Canvas Name="canvas1"
+                    Background="WhiteSmoke"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    ></Canvas>
+        </ScrollViewer>
     </Grid>
     <Window.Background>
         <LinearGradientBrush EndPoint="1,0.5"
