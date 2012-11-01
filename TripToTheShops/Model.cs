@@ -16,7 +16,6 @@ namespace TripToTheShops
         protected Model()
         {
             this.log = new List<string>();
-            this.shopsList = new List<Shop>();
             startupTime = DateTime.Now.ToString().Replace(':', '_') + ".txt";
         }
 
@@ -33,14 +32,9 @@ namespace TripToTheShops
         public static Model Current { get { return current; } }
 
         /// <summary>
-        /// Список магазинов (private)
-        /// </summary>
-        private List<Shop> shopsList;
-
-        /// <summary>
         /// Список магазинов
         /// </summary>
-        public Shop[] Shops { get { return shopsList.ToArray(); } }
+        public Shop[] Shops { get; private set; }
 
 
         /// <summary>
@@ -98,7 +92,7 @@ namespace TripToTheShops
                     shops.Add(shop);
                     AddLog("Add shop '" + nameShop + "'.");
                 }
-                shopsList = shops;
+                this.Shops = shops.ToArray();
                
                 IsLoadShops = true;
                 return true;
