@@ -36,6 +36,7 @@ namespace TripToTheShops
         /// </summary>
         public Shop[] Shops { get; private set; }
 
+        public ShoppingList ShoppingList { get; private set; }
 
         /// <summary>
         /// Log (private)
@@ -65,7 +66,7 @@ namespace TripToTheShops
         /// Загрузка магазинов
         /// </summary>
         /// <param name="doc">XML документ</param>
-        /// <returns></returns>
+        /// <returns>Загружен ли список магазинов</returns>
         public bool LoadShops(XDocument doc)
         {
             try
@@ -76,8 +77,8 @@ namespace TripToTheShops
                 {
                     var id = shopXML.Attribute("id").Value;
                     var nameShop = shopXML.Element("name").Value;
-                    var cootdinatesXML = shopXML.Element("coordinates");
-                    var cootdinates = new Point(double.Parse(cootdinatesXML.Attribute("x").Value.Replace('.', ',')), double.Parse(cootdinatesXML.Attribute("y").Value.Replace('.', ',')));
+                    var coordinatesXML = shopXML.Element("coordinates");
+                    var coordinates = new Point(double.Parse(coordinatesXML.Attribute("x").Value.Replace('.', ',')), double.Parse(coordinatesXML.Attribute("y").Value.Replace('.', ',')));
                     var productsXML = shopXML.Element("products").Elements("product");
                     var products = new List<Product>();
                     foreach (var productXML in productsXML)
@@ -88,18 +89,56 @@ namespace TripToTheShops
                         var product = new Product(code, price, name);
                         products.Add(product);
                     }
-                    var shop = new Shop(id, nameShop, cootdinates, products);
+                    var shop = new Shop(id, nameShop, coordinates, products);
                     shops.Add(shop);
                     AddLog("Add shop '" + nameShop + "'.");
                 }
                 this.Shops = shops.ToArray();
-               
+
                 IsLoadShops = true;
                 return true;
             }
-            catch
+            catch (Exception e)
             {
+                AddLog(e.Message);
                 IsLoadShops = false;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Загружен ли список покупок
+        /// </summary>
+        public bool IsLoadShoppingList { get; private set; }
+
+        /// <summary>
+        /// Загрузка списка покупок
+        /// </summary>
+        /// <param name="doc">XML документ</param>
+        /// <returns>Загружен ли список покупок</returns>
+        public bool LoadShoppingList(XDocument doc)
+        {
+            try
+            {
+                var coordinatesXML = doc.Root.Element("coordinates");
+                Point coordinates = new Point(double.Parse(coordinatesXML.Attribute("x").Value.Replace('.', ',')), double.Parse(coordinatesXML.Attribute("y").Value.Replace('.', ',')));
+                ParameterShopping op = ParameterShopping.Cost;
+                if (doc.Root.Element("parameters").Element("distance") == null)
+                    if (doc.Root.Element("parameters").Element("cost") == null)
+                        throw new ArgumentException("Parameter 'ParameterShopping' is not specified.");
+                    else
+                        op = ParameterShopping.Cost;
+                else
+                    op = ParameterShopping.Distance;
+                var codeProducts = doc.Root.Element("products").Elements("product").Select(q => q.Attribute("code").Value).ToList();
+                this.ShoppingList = new ShoppingList(coordinates, op, codeProducts);
+                IsLoadShoppingList = true;
+                return true;
+            }
+            catch (Exception e)
+            {
+                AddLog(e.Message);
+                IsLoadShoppingList = false;
                 return false;
             }
         }

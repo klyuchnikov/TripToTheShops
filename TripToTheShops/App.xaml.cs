@@ -25,9 +25,22 @@ namespace TripToTheShops
                         Model.Current.AddLog("Load shops is successful.");
                     else
                         Model.Current.AddLog("Load shops is failed.");
-
                 }
-
+                else
+                     Model.Current.AddLog("File is not exists.");
+                if (e.Args.Length > 1)
+                    if (File.Exists(e.Args[1]))
+                    {
+                        var doc = XDocument.Load(e.Args[1]);
+                        if (Model.Current.LoadShoppingList(doc))
+                            Model.Current.AddLog("Load shoppingList is successful.");
+                        else
+                            Model.Current.AddLog("Load shoppingList is failed.");
+                    }
+                    else
+                        Model.Current.AddLog("File is not exists.");
+                else
+                    Model.Current.AddLog("Parameter 'shoppingList' is not specified.");
             }
         }
     }
