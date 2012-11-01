@@ -41,6 +41,8 @@ namespace TripToTheShops
             this.Name = name;
             this.Coordinates = coordinates;
             this.Products = products.ToArray();
+            foreach (var p in this.Products)
+                p.SetShop(this);
         }
     }
 }
