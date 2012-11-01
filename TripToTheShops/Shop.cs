@@ -24,14 +24,9 @@ namespace TripToTheShops
         public Point Coordinates { get; private set; }
 
         /// <summary>
-        /// Список продаваемых продуктов (private)
-        /// </summary>
-        private List<Product> products = new List<Product>();
-
-        /// <summary>
         /// Список продаваемых продуктов
         /// </summary>
-        public Product[] Products { get { return products.ToArray(); } }
+        public Product[] Products { get; private set; }
 
         /// <summary>
         /// Создание нового экземпляра магазина
@@ -45,7 +40,7 @@ namespace TripToTheShops
             this.ID = id;
             this.Name = name;
             this.Coordinates = coordinates;
-            this.products.AddRange(products);
+            this.Products = products.ToArray();
         }
     }
 }
