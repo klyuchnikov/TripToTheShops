@@ -58,6 +58,7 @@
     <Compile Include="Model.cs" />
     <Compile Include="ParameterShopping.cs" />
     <Compile Include="Shop.cs" />
+    <Compile Include="ShoppingList.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
