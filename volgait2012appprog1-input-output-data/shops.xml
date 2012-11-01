@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE shops SYSTEM "shops.dtd">
+
+<shops>
+	<shop id="No1">
+		<name>Food Lion</name>
+		<coordinates x="100" y="50" />
+		<products>
+			<product code="eggs" price="200">Eggs</product>
+			<product code="sausage" price="150">Sausage</product>
+			<product code="bacon" price="400">Bacon</product>
+			<product code="spam" price="99.90">Spam</product>
+		</products>
+	</shop>
+	<shop id="No2">
+		<name>Bottom Dollar Food</name> 
+		<coordinates x="-100" y="-200" />
+		<products>
+			<product code="sausage" price="150">Sausage</product>
+			<product code="bacon" price="500">Bacon</product>
+			<product code="spam" price="49.90">Spam</product>
+		</products>
+	</shop>
+</shops>

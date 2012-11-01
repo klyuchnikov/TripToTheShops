@@ -1,0 +1,18 @@
+﻿<!ELEMENT shoppingList (coordinates,parameters,products)>
+
+<!ELEMENT coordinates EMPTY>
+<!ATTLIST coordinates
+	x	CDATA #REQUIRED
+	y	CDATA #REQUIRED
+>
+
+<!ELEMENT parameters (cost|distance)>
+<!ELEMENT cost (#PCDATA)>		<!-- MIN -->
+<!ELEMENT distance (#PCDATA)>	<!-- MIN -->
+
+<!ELEMENT products (product+)>
+
+<!ELEMENT product (#PCDATA)>
+<!ATTLIST product
+	code	CDATA #REQUIRED
+>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE shoppingList SYSTEM "shopping-list.dtd">
+
+<shoppingList>
+	<coordinates x="50" y="50" />
+	<parameters>
+<!-- minimize either cost... -->
+		<cost>MIN</cost>
+<!-- ...or distance traveled 
+		<distance>MIN</distance>
+ -->
+	</parameters>
+	<products>
+		<product code="spam">Spam</product>
+		<product code="sausage">Sausage</product>
+		<product code="eggs">Eggs</product>
+	</products>
+</shoppingList>

@@ -1,0 +1,22 @@
+﻿<!ELEMENT shops (shop+)>
+
+<!ELEMENT shop (name,coordinates,products)>
+<!ATTLIST shop
+	id	ID #REQUIRED
+>
+
+<!ELEMENT name (#PCDATA)>
+
+<!ELEMENT coordinates EMPTY>
+<!ATTLIST coordinates
+	x	CDATA #REQUIRED
+	y	CDATA #REQUIRED
+>
+
+<!ELEMENT products (product+)>
+
+<!ELEMENT product (#PCDATA)>
+<!ATTLIST product
+	code	CDATA #REQUIRED
+	price	CDATA #REQUIRED
+>

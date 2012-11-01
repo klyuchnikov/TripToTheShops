@@ -1,0 +1,28 @@
+﻿<!ELEMENT shoppingPlan (coordinates,totals,shops)>
+
+<!ELEMENT coordinates EMPTY>
+<!ATTLIST coordinates
+	x	CDATA #REQUIRED
+	y	CDATA #REQUIRED
+>
+
+<!ELEMENT totals (cost,distance)>
+<!ELEMENT cost (#PCDATA)>
+<!ELEMENT distance (#PCDATA)>
+
+<!ELEMENT shops (shop*)>
+
+<!ELEMENT shop (name?,products)>
+<!ATTLIST shop
+	id	ID #REQUIRED
+>
+
+<!ELEMENT name (#PCDATA)>
+
+<!ELEMENT products (product+)>
+
+<!ELEMENT product (#PCDATA)>
+<!ATTLIST product
+	code	CDATA #REQUIRED
+	price	CDATA #IMPLIED
+>
