@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using System.Windows;
+using System.IO;
 
 namespace TripToTheShops
 {
@@ -12,7 +13,14 @@ namespace TripToTheShops
         /// <summary>
         /// Закрытый конструктор
         /// </summary>
-        protected Model() { }
+        protected Model()
+        {
+            this.Log = new List<string>();
+            this.shopsList = new List<Shop>();
+            startupTime = DateTime.Now.ToString().Replace(':', '_') + ".txt";
+        }
+
+        private string startupTime;
 
         /// <summary>
         /// Внутреннее поле сущности Модели
@@ -27,7 +35,7 @@ namespace TripToTheShops
         /// <summary>
         /// Список магазинов (private)
         /// </summary>
-        private List<Shop> shopsList = new List<Shop>();
+        private List<Shop> shopsList;
 
         /// <summary>
         /// Список магазинов
@@ -35,6 +43,16 @@ namespace TripToTheShops
         public Shop[] Shops { get { return shopsList.ToArray(); } }
 
 
+        public List<string> Log { get; private set; }
+
+        public void AddLog(string str)
+        {
+            File.AppendAllText(startupTime, DateTime.Now + " " + str);
+        }
+
+        /// <summary>
+        /// Загружен ли список магазинов
+        /// </summary>
         public bool IsLoadShops { get; private set; }
         /// <summary>
         /// Загрузка магазинов

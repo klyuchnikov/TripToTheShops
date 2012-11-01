@@ -21,7 +21,11 @@ namespace TripToTheShops
                 if (File.Exists(e.Args[0]))
                 {
                     var doc = XDocument.Load(e.Args[0]);
-                    Model.Current.LoadShops(doc);
+                    if (Model.Current.LoadShops(doc))
+                        Model.Current.AddLog("Load shops is successful.");
+                    else
+                        Model.Current.AddLog("Load shops is failed.");
+
                 }
 
             }
