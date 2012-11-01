@@ -43,11 +43,24 @@ namespace TripToTheShops
         public Shop[] Shops { get { return shopsList.ToArray(); } }
 
 
-        public List<string> Log { get; private set; }
+        /// <summary>
+        /// Log (private)
+        /// </summary>
+        private List<string> log;
 
+        /// <summary>
+        /// Log
+        /// </summary>
+        public string[] Log { get { return log.ToArray(); } }
+
+        /// <summary>
+        /// Add text log
+        /// </summary>
+        /// <param name="str">text</param>
         public void AddLog(string str)
         {
             File.AppendAllText(startupTime, DateTime.Now + " " + str);
+            log.Add(str);
         }
 
         /// <summary>
