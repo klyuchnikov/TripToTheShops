@@ -15,7 +15,7 @@ namespace TripToTheShops
         /// </summary>
         protected Model()
         {
-            this.Log = new List<string>();
+            this.log = new List<string>();
             this.shopsList = new List<Shop>();
             startupTime = DateTime.Now.ToString().Replace(':', '_') + ".txt";
         }
@@ -59,7 +59,7 @@ namespace TripToTheShops
         /// <param name="str">text</param>
         public void AddLog(string str)
         {
-            File.AppendAllText(startupTime, DateTime.Now + " " + str);
+            File.AppendAllText(startupTime, DateTime.Now + " " + str + Environment.NewLine);
             log.Add(str);
         }
 
@@ -96,8 +96,10 @@ namespace TripToTheShops
                     }
                     var shop = new Shop(id, nameShop, cootdinates, products);
                     shops.Add(shop);
+                    AddLog("Add shop '" + nameShop + "'.");
                 }
                 shopsList = shops;
+               
                 IsLoadShops = true;
                 return true;
             }
