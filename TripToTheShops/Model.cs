@@ -16,6 +16,7 @@ namespace TripToTheShops
         protected Model()
         {
             this.log = new List<string>();
+            this.Shops = new Shop[0] { };
             startupTime = DateTime.Now.ToString().Replace(':', '_') + ".txt";
         }
 
