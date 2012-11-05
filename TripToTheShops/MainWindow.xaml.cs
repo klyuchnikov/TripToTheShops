@@ -182,18 +182,38 @@ namespace TripToTheShops
                 else
                     listProducts.Add(prod.Shop.ID, new List<Product>(new[] { prod }));
             }
-
-            PaintConnectShops(min, new Point(0, 0), Model.Current.Shops.Single(a => a.ID == listProducts.First().Key).Coordinates);
+            var first = Model.Current.Shops.Single(a => a.ID == listProducts.First().Key);
+            PaintConnectShops(min, new Point(0, 0), first.Coordinates);
+            var totalDist = 0.0;
+            var totalCost = 0.0;
+            totalDist += GetDistance(new Point(0, 0), first.Coordinates);
+            totalCost += listProducts.First().Value.Sum(q => q.Price);
             for (int i = 0; i < listProducts.Keys.Count - 1; i++)
             {
                 var shopSource = Model.Current.Shops.Single(a => a.ID == listProducts.Keys.ElementAt(i));
                 var shopDest = Model.Current.Shops.Single(a => a.ID == listProducts.Keys.ElementAt(i + 1));
                 PaintConnectShops(min, shopSource.Coordinates, shopDest.Coordinates);
                 PaintLabels(listProducts[listProducts.Keys.ElementAt(i)], shopSource.Coordinates, shopDest.Coordinates, shopSource.Name);
+                totalDist += GetDistance(shopSource.Coordinates, shopDest.Coordinates);
+                totalCost += listProducts[listProducts.Keys.ElementAt(i + 1)].Sum(q => q.Price);
             }
             var last = Model.Current.Shops.Single(a => a.ID == listProducts.Last().Key);
             PaintLabels(listProducts[listProducts.Keys.Last()], last.Coordinates, new Point(0, 0), last.Name);
             PaintConnectShops(min, last.Coordinates, new Point(0, 0));
+            totalDist += GetDistance(last.Coordinates, new Point(0, 0));
+            labelCost.Content = string.Format("{0:G7}", totalCost);
+            labelDistance.Content = totalDist;
+
+            var otherShops = Model.Current.Shops.Where(q => !listProducts.ContainsKey(q.ID)).ToArray();
+            foreach (var shop in otherShops)
+            {
+                canvas1.Children.Add(new Label() { Content = shop.Name, Margin = new Thickness(min + shop.Coordinates.X + 50, min + shop.Coordinates.Y, 0, 0) });
+            }
+        }
+
+        private double GetDistance(Point s, Point d)
+        {
+            return Math.Abs(s.X - d.X) + Math.Abs(s.Y - d.Y);
         }
 
         private void PaintLabels(List<Product> listProducts, Point cs, Point cd, string str)
@@ -203,7 +223,7 @@ namespace TripToTheShops
             var formattedText = new FormattedText(str, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(this.FontFamily, this.FontStyle, this.FontWeight, this.FontStretch), this.FontSize, Brushes.Black);
 
             if (cs.X > cd.X)
-                grid.Margin = new Thickness(cs.X + min + formattedText.Width, cs.Y + min, 0, 0);
+                grid.Margin = new Thickness(cs.X + min + 50, cs.Y + min, 0, 0);
             else
                 grid.Margin = new Thickness(cs.X + min - formattedText.Width - 10, cs.Y + min, 0, 0);
 
