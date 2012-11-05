@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Win32;
+using System.Globalization;
 
 namespace TripToTheShops
 {
@@ -188,22 +189,33 @@ namespace TripToTheShops
                 var shopSource = Model.Current.Shops.Single(a => a.ID == listProducts.Keys.ElementAt(i));
                 var shopDest = Model.Current.Shops.Single(a => a.ID == listProducts.Keys.ElementAt(i + 1));
                 PaintConnectShops(min, shopSource.Coordinates, shopDest.Coordinates);
-                var grid = new Grid() { Width = 200, Height = 500 };
-                canvas1.Children.Add(grid);
-                if (shopSource.Coordinates.X > shopDest.Coordinates.X)
-                    grid.Margin = new Thickness(shopSource.Coordinates.X + min + 50, shopSource.Coordinates.Y + min, 0, 0);
-                else
-                    grid.Margin = new Thickness(shopSource.Coordinates.X + min - 100, shopSource.Coordinates.Y + min, 0, 0);
-
-                grid.Children.Add(new Line() { X2 = 50, Stroke = Brushes.Black, StrokeThickness = 2, Margin = new Thickness(6, 25, 0, 0) });
-                grid.Children.Add(new Label() { Content = shopSource.Name });
-                for (var k = 0; k < listProducts[listProducts.Keys.ElementAt(i)].Count; k++)
-                {
-                    
-                }
+                PaintLabels(listProducts[listProducts.Keys.ElementAt(i)], shopSource.Coordinates, shopDest.Coordinates, shopSource.Name);
             }
+            var last = Model.Current.Shops.Single(a => a.ID == listProducts.Last().Key);
+            PaintLabels(listProducts[listProducts.Keys.Last()], last.Coordinates, new Point(0, 0), last.Name);
+            PaintConnectShops(min, last.Coordinates, new Point(0, 0));
+        }
 
-            PaintConnectShops(min, Model.Current.Shops.Single(a => a.ID == listProducts.Last().Key).Coordinates, new Point(0, 0));
+        private void PaintLabels(List<Product> listProducts, Point cs, Point cd, string str)
+        {
+            var grid = new Grid() { Width = 500, Height = 500 };
+            canvas1.Children.Add(grid);
+            var formattedText = new FormattedText(str, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(this.FontFamily, this.FontStyle, this.FontWeight, this.FontStretch), this.FontSize, Brushes.Black);
+
+            if (cs.X > cd.X)
+                grid.Margin = new Thickness(cs.X + min + formattedText.Width, cs.Y + min, 0, 0);
+            else
+                grid.Margin = new Thickness(cs.X + min - formattedText.Width - 10, cs.Y + min, 0, 0);
+
+            grid.Children.Add(new Line() { X2 = formattedText.Width, Stroke = Brushes.Black, StrokeThickness = 2, Margin = new Thickness(6, 25, 0, 0) });
+            var labelname = new Label() { Content = str };
+
+            grid.Children.Add(labelname);
+            for (var k = 0; k < listProducts.Count; k++)
+            {
+                var p = listProducts[k];
+                grid.Children.Add(new Label() { Content = p.Name, Margin = new Thickness(0, 25 + k * 15, 0, 0) });
+            }
         }
     }
 }
