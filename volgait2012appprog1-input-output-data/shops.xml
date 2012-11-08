@@ -19,6 +19,16 @@
 			<product code="sausage" price="150">Sausage</product>
 			<product code="bacon" price="500">Bacon</product>
 			<product code="spam" price="49.90">Spam</product>
+			<product code="other" price="69.90">other</product>
+		</products>
+	</shop>
+	<shop id="No3">
+		<name>Bottom Dollar Food</name> 
+		<coordinates x="-50" y="-50" />
+		<products>
+			<product code="sausage" price="150">Sausage</product>
+			<product code="bacon" price="500">Bacon</product>
+			<product code="spam" price="49.90">Spam</product>
 		</products>
 	</shop>
 </shops>

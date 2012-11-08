@@ -173,7 +173,46 @@ namespace TripToTheShops
                 MessageBox.Show("Select products!");
                 return;
             }
+            if (RBminCost.IsChecked == true)
+                PlanMinimizeCost(selectedProducts);
+            if (RBminDist.IsChecked == true)
+                PlanMinimizeDist(selectedProducts);
+        }
+
+        private void PlanMinimizeDist(Product[] selectedProducts)
+        {
+            var orderToDistShopsToHome = Model.Current.Shops.OrderBy(q => GetDistance(new Point(0, 0), q.Coordinates)).ToList();
+            var remainingProducts = new List<Product>(selectedProducts);
+            var totalDist = 0.0;
+            var totalCost = 0.0;
             var listProducts = new Dictionary<string, List<Product>>();
+            do
+            {
+                Shop shop = orderToDistShopsToHome.First(a => a.Products.Intersect(remainingProducts, new ProductComparer()).Count() != 0);
+                totalDist += GetDistance(new Point(0, 0), shop.Coordinates);
+                listProducts.Add(shop.ID, new List<Product>());
+                foreach (var a in shop.Products)
+                {
+                    if (remainingProducts.Contains(a, new ProductComparer()))
+                    {
+                        listProducts[shop.ID].Add(a);
+                        remainingProducts.Remove(remainingProducts.Single(q => q.Code == a.Code));
+                        totalCost += a.Price;
+                    }
+                }
+                orderToDistShopsToHome.Remove(shop);
+            } while (remainingProducts.Count != 0);
+            totalDist += GetDistance(Model.Current.Shops.Single(a => a.ID == listProducts.Last().Key).Coordinates, new Point(0, 0));
+
+
+        }
+
+
+        private void PlanMinimizeCost(Product[] selectedProducts)
+        {
+            var listProducts = new Dictionary<string, List<Product>>();
+            var totalDist = 0.0;
+            var totalCost = 0.0;
             foreach (var p in selectedProducts)
             {
                 var prod = Model.Current.Shops.SelectMany(q => q.Products).Where(a => a.Code == p.Code).OrderBy(q => q.Price).First();
@@ -184,10 +223,9 @@ namespace TripToTheShops
             }
             var first = Model.Current.Shops.Single(a => a.ID == listProducts.First().Key);
             PaintConnectShops(min, new Point(0, 0), first.Coordinates);
-            var totalDist = 0.0;
-            var totalCost = 0.0;
             totalDist += GetDistance(new Point(0, 0), first.Coordinates);
             totalCost += listProducts.First().Value.Sum(q => q.Price);
+
             for (int i = 0; i < listProducts.Keys.Count - 1; i++)
             {
                 var shopSource = Model.Current.Shops.Single(a => a.ID == listProducts.Keys.ElementAt(i));

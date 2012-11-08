@@ -76,13 +76,13 @@
                      Height="16"
                      HorizontalAlignment="Left"
                      Margin="12,23,0,0"
-                     Name="radioButton1"
+                     Name="RBminCost"
                      VerticalAlignment="Top" />
         <RadioButton Content="Minimize distance"
                      Height="16"
                      HorizontalAlignment="Left"
                      Margin="12,45,0,0"
-                     Name="radioButton2"
+                     Name="RBminDist"
                      VerticalAlignment="Top"
                      Grid.Row="3" />
         <Button Content="Plan"
