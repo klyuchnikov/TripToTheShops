@@ -40,11 +40,14 @@ namespace TripToTheShops
             globalGrid.UpdateLayout();
             PaintShopsToCanvas();
         }
-
+        /// <summary>
+        /// Рисование соединения между двумя точками на Canvas 
+        /// </summary>
+        /// <param name="min"></param>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
         private void PaintConnectShops(double min, Point source, Point destination)
         {
-            //  var shopSource = source.Tag as Shop;
-            //   var shopDestinaion = destination.Tag as Shop;
             var ss = source;
             var sd = destination;
             var polyline = new Polyline()
@@ -111,13 +114,14 @@ namespace TripToTheShops
             Canvas.SetTop(polyline, min);
 
             canvas1.Children.Add(polygon);
-            // Canvas.SetLeft(polygon, min + sd.X + 24 - (wide / 2));
-            // Canvas.SetTop(polygon, min + sd.Y - 8);
             canvas1.UpdateLayout();
         }
 
         private double min = 0;
 
+        /// <summary>
+        /// Рисование магазинов и дома
+        /// </summary>
         private void PaintShopsToCanvas()
         {
             canvas1.Width = 0;
@@ -159,7 +163,6 @@ namespace TripToTheShops
             Canvas.SetLeft(imageHome, min);
             Canvas.SetTop(imageHome, min);
 
-            //     PaintConnectShops(min, (Point)imgs[0].Tag, (Point)imgs[1].Tag);
             canvas1.Children.Add(imageHome);
             canvas1.UpdateLayout();
         }
@@ -173,57 +176,28 @@ namespace TripToTheShops
                 MessageBox.Show("Select products!");
                 return;
             }
-            if (RBminCost.IsChecked == true)
-                PlanMinimizeCost(selectedProducts);
-            if (RBminDist.IsChecked == true)
-                PlanMinimizeDist(selectedProducts);
-        }
-
-        private void PlanMinimizeDist(Product[] selectedProducts)
-        {
-            var orderToDistShopsToHome = Model.Current.Shops.OrderBy(q => GetDistance(new Point(0, 0), q.Coordinates)).ToList();
-            var remainingProducts = new List<Product>(selectedProducts);
-            var totalDist = 0.0;
-            var totalCost = 0.0;
-            var listProducts = new Dictionary<string, List<Product>>();
-            do
+            if (RBminCost.IsChecked == RBminDist.IsChecked)
             {
-                Shop shop = orderToDistShopsToHome.First(a => a.Products.Intersect(remainingProducts, new ProductComparer()).Count() != 0);
-                totalDist += GetDistance(new Point(0, 0), shop.Coordinates);
-                listProducts.Add(shop.ID, new List<Product>());
-                foreach (var a in shop.Products)
-                {
-                    if (remainingProducts.Contains(a, new ProductComparer()))
-                    {
-                        listProducts[shop.ID].Add(a);
-                        remainingProducts.Remove(remainingProducts.Single(q => q.Code == a.Code));
-                        totalCost += a.Price;
-                    }
-                }
-                orderToDistShopsToHome.Remove(shop);
-            } while (remainingProducts.Count != 0);
-            totalDist += GetDistance(Model.Current.Shops.Single(a => a.ID == listProducts.Last().Key).Coordinates, new Point(0, 0));
-
-
-        }
-
-
-        private void PlanMinimizeCost(Product[] selectedProducts)
-        {
-            var listProducts = new Dictionary<string, List<Product>>();
-            var totalDist = 0.0;
-            var totalCost = 0.0;
-            foreach (var p in selectedProducts)
-            {
-                var prod = Model.Current.Shops.SelectMany(q => q.Products).Where(a => a.Code == p.Code).OrderBy(q => q.Price).First();
-                if (listProducts.ContainsKey(prod.Shop.ID))
-                    listProducts[prod.Shop.ID].Add(prod);
-                else
-                    listProducts.Add(prod.Shop.ID, new List<Product>(new[] { prod }));
+                MessageBox.Show("Select goal!");
+                return;
             }
+            if (RBminCost.IsChecked == true)
+                PaintPlan(Model.Current.PlanMinimizeCost(selectedProducts));
+            if (RBminDist.IsChecked == true)
+                PaintPlan(Model.Current.PlanMinimizeDist(selectedProducts));
+        }
+
+        /// <summary>
+        /// Рисование плана покупок
+        /// </summary>
+        /// <param name="listProducts"></param>
+        private void PaintPlan(Dictionary<string, List<Product>> listProducts)
+        {
+            var totalDist = 0.0;
+            var totalCost = 0.0;
             var first = Model.Current.Shops.Single(a => a.ID == listProducts.First().Key);
             PaintConnectShops(min, new Point(0, 0), first.Coordinates);
-            totalDist += GetDistance(new Point(0, 0), first.Coordinates);
+            totalDist += Model.Current.GetDistance(new Point(0, 0), first.Coordinates);
             totalCost += listProducts.First().Value.Sum(q => q.Price);
 
             for (int i = 0; i < listProducts.Keys.Count - 1; i++)
@@ -231,14 +205,14 @@ namespace TripToTheShops
                 var shopSource = Model.Current.Shops.Single(a => a.ID == listProducts.Keys.ElementAt(i));
                 var shopDest = Model.Current.Shops.Single(a => a.ID == listProducts.Keys.ElementAt(i + 1));
                 PaintConnectShops(min, shopSource.Coordinates, shopDest.Coordinates);
-                PaintLabels(listProducts[listProducts.Keys.ElementAt(i)], shopSource.Coordinates, shopDest.Coordinates, shopSource.Name);
-                totalDist += GetDistance(shopSource.Coordinates, shopDest.Coordinates);
+                PaintLabels(listProducts[listProducts.Keys.ElementAt(i)], shopSource.Coordinates, shopSource.Coordinates.X > shopDest.Coordinates.X, shopSource.Name);
+                totalDist += Model.Current.GetDistance(shopSource.Coordinates, shopDest.Coordinates);
                 totalCost += listProducts[listProducts.Keys.ElementAt(i + 1)].Sum(q => q.Price);
             }
             var last = Model.Current.Shops.Single(a => a.ID == listProducts.Last().Key);
-            PaintLabels(listProducts[listProducts.Keys.Last()], last.Coordinates, new Point(0, 0), last.Name);
+            PaintLabels(listProducts[listProducts.Keys.Last()], last.Coordinates, last.Coordinates.X > 0, last.Name);
             PaintConnectShops(min, last.Coordinates, new Point(0, 0));
-            totalDist += GetDistance(last.Coordinates, new Point(0, 0));
+            totalDist += Model.Current.GetDistance(last.Coordinates, new Point(0, 0));
             labelCost.Content = string.Format("{0:G7}", totalCost);
             labelDistance.Content = totalDist;
 
@@ -249,18 +223,20 @@ namespace TripToTheShops
             }
         }
 
-        private double GetDistance(Point s, Point d)
-        {
-            return Math.Abs(s.X - d.X) + Math.Abs(s.Y - d.Y);
-        }
-
-        private void PaintLabels(List<Product> listProducts, Point cs, Point cd, string str)
+        /// <summary>
+        /// Рисование названий продуктов около магазина
+        /// </summary>
+        /// <param name="listProducts">список продуктов</param>
+        /// <param name="cs">точка магазина</param>
+        /// <param name="isRight">Расположение названий относительно магазина</param>
+        /// <param name="str">имя магазина</param>
+        private void PaintLabels(List<Product> listProducts, Point cs, bool isRight, string str)
         {
             var grid = new Grid() { Width = 500, Height = 500 };
             canvas1.Children.Add(grid);
             var formattedText = new FormattedText(str, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface(this.FontFamily, this.FontStyle, this.FontWeight, this.FontStretch), this.FontSize, Brushes.Black);
 
-            if (cs.X > cd.X)
+            if (isRight)
                 grid.Margin = new Thickness(cs.X + min + 50, cs.Y + min, 0, 0);
             else
                 grid.Margin = new Thickness(cs.X + min - formattedText.Width - 10, cs.Y + min, 0, 0);

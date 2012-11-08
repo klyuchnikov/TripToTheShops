@@ -6,6 +6,9 @@ using System.Windows;
 
 namespace TripToTheShops
 {
+    /// <summary>
+    /// Сущность "Магазин"
+    /// </summary>
     public class Shop
     {
         /// <summary>

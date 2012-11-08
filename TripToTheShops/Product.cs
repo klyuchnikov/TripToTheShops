@@ -38,8 +38,15 @@ namespace TripToTheShops
             this.Name = name;
         }
 
+        /// <summary>
+        /// В каком магазине лежит
+        /// </summary>
         public Shop Shop { get; private set; }
 
+        /// <summary>
+        /// Присвоить значение магазина
+        /// </summary>
+        /// <param name="shop"></param>
         public void SetShop(Shop shop)
         {
             this.Shop = shop;

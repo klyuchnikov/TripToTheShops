@@ -8,6 +8,9 @@ using System.IO;
 
 namespace TripToTheShops
 {
+    /// <summary>
+    /// Класс модели 
+    /// </summary>
     public class Model
     {
         /// <summary>
@@ -37,8 +40,14 @@ namespace TripToTheShops
         /// </summary>
         public Shop[] Shops { get; private set; }
 
+        /// <summary>
+        /// Список покупок
+        /// </summary>
         public ShoppingList ShoppingList { get; private set; }
 
+        /// <summary>
+        /// Все продукты
+        /// </summary>
         public Product[] AllProducts
         {
             get
@@ -71,10 +80,11 @@ namespace TripToTheShops
         /// Загружен ли список магазинов
         /// </summary>
         public bool IsLoadShops { get; private set; }
+
         /// <summary>
         /// Загрузка магазинов
         /// </summary>
-        /// <param name="doc">XML документ</param>
+        /// <param name="path">XML документ</param>
         /// <returns>Загружен ли список магазинов</returns>
         public bool LoadShops(string path)
         {
@@ -127,7 +137,7 @@ namespace TripToTheShops
         /// <summary>
         /// Загрузка списка покупок
         /// </summary>
-        /// <param name="doc">XML документ</param>
+        /// <param name="path">XML документ</param>
         /// <returns>Загружен ли список покупок</returns>
         public bool LoadShoppingList(string path)
         {
@@ -156,6 +166,61 @@ namespace TripToTheShops
                 IsLoadShoppingList = false;
                 return false;
             }
+        }
+        /// <summary>
+        /// Получение расстояния между двумя точками
+        /// </summary>
+        /// <param name="source">Начальная точка</param>
+        /// <param name="destination">Конечная точка</param>
+        /// <returns>Расстояние между точками</returns>
+        public double GetDistance(Point source, Point destination)
+        {
+            return Math.Abs(source.X - destination.X) + Math.Abs(source.Y - destination.Y);
+        }
+
+        /// <summary>
+        /// Получение плана покупок, оптимизирированного по дистанции до магазинов
+        /// </summary>
+        /// <param name="planShopping">список продуктов</param>
+        /// <returns>словарь, ключ которого Id магазина, а значение - список продуктов из этого магазина</returns>
+        public Dictionary<string, List<Product>> PlanMinimizeDist(Product[] planShopping)
+        {
+            var orderToDistShopsToHome = Model.Current.Shops.OrderBy(q => GetDistance(new Point(0, 0), q.Coordinates)).ToList();
+            var remainingProducts = new List<Product>(planShopping);
+            var listProducts = new Dictionary<string, List<Product>>();
+            do
+            {
+                Shop shop = orderToDistShopsToHome.First(a => a.Products.Intersect(remainingProducts, new ProductComparer()).Count() != 0);
+                listProducts.Add(shop.ID, new List<Product>());
+                foreach (var a in shop.Products)
+                {
+                    if (remainingProducts.Contains(a, new ProductComparer()))
+                    {
+                        listProducts[shop.ID].Add(a);
+                        remainingProducts.Remove(remainingProducts.Single(q => q.Code == a.Code));
+                    }
+                }
+                orderToDistShopsToHome.Remove(shop);
+            } while (remainingProducts.Count != 0);
+            return listProducts;
+        }
+        /// <summary>
+        /// Получение плана покупок, оптимизирированного по дистанции до магазинов
+        /// </summary>
+        /// <param name="planShopping">список продуктов</param>
+        /// <returns>словарь, ключ которого Id магазина, а значение - список продуктов из этого магазина</returns>
+        public Dictionary<string, List<Product>> PlanMinimizeCost(Product[] planShopping)
+        {
+            var listProducts = new Dictionary<string, List<Product>>();
+            foreach (var p in planShopping)
+            {
+                var prod = Model.Current.Shops.SelectMany(q => q.Products).Where(a => a.Code == p.Code).OrderBy(q => q.Price).First();
+                if (listProducts.ContainsKey(prod.Shop.ID))
+                    listProducts[prod.Shop.ID].Add(prod);
+                else
+                    listProducts.Add(prod.Shop.ID, new List<Product>(new[] { prod }));
+            }
+            return listProducts;
         }
     }
 }
