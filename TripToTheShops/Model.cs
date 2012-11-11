@@ -185,54 +185,62 @@ namespace TripToTheShops
         /// <returns>словарь, ключ которого Id магазина, а значение - список продуктов из этого магазина</returns>
         public Dictionary<string, List<Product>> PlanMinimizeDist(Product[] planShopping)
         {
-            //  var allshops = Model.Current.Shops.Where(a => a.Products.Intersect(planShopping, new ProductComparer()).Count() != 0);
-            //   allshops = allshops.OrderBy(a => a.Products.Intersect(planShopping, new ProductComparer()).Count());
-
-
-            var variantsShops = new List<List<Shop>>(); //new List<Dictionary<string, List<Product>>>();
+            var variantsShops = new List<Dictionary<string, List<Product>>>(); //new List<Dictionary<string, List<Product>>>();
             var remainingProducts = new List<Product>(planShopping);
             foreach (var p in planShopping)
             {
-
                 var shopss = Model.Current.Shops.Where(a => a.Products.Contains(p, new ProductComparer()));
                 if (variantsShops.Count > 0)
                     for (int i = 0; i < variantsShops.Count; i++)
                     {
                         var s = variantsShops[i];
-                        if (s.Count(q => q.Products.Contains(p, new ProductComparer())) == 0)
+
+                        if (s.Count(a => this.Shops.Single(q => q.ID == a.Key).Products.Contains(p, new ProductComparer())) == 0)
                         {
-                            var nls = new List<List<Shop>>();
+                            var nls = new List<Dictionary<string, List<Product>>>();
                             foreach (var a in shopss)
                             {
-                                var ls = new List<Shop>();
-                                ls.AddRange(s);
-                                if (ls.SingleOrDefault(q => q.ID == a.ID) == null)
-                                    ls.Add(a);
+                                var ls = new Dictionary<string, List<Product>>(s);
+                                if (!ls.ContainsKey(a.ID))
+                                    ls.Add(a.ID, new List<Product>(new[] { p }));
                                 nls.Add(ls);
                             }
-                            variantsShops.RemoveAt(i);
+                            variantsShops.RemoveAt(i--);
                             variantsShops.AddRange(nls);
+                        }
+                        else
+                        {
+                            if (!s.SelectMany(q => q.Value).Contains(p, new ProductComparer()))
+                                foreach (var sh in s)
+                                {
+                                    if (Model.Current.Shops.Single(q => q.ID == sh.Key).Products.Contains(p, new ProductComparer()))
+                                    {
+                                        sh.Value.Add(p);
+                                        break;
+                                    }
+                                }
                         }
                     }
                 else
                 {
-                    var nls = new List<List<Shop>>();
+                    var nls = new List<Dictionary<string, List<Product>>>();
                     foreach (var a in shopss)
                     {
-                        var ls = new List<Shop>();
-                        ls.Add(a);
+                        var ls = new Dictionary<string, List<Product>>();
+                        ls.Add(a.ID, new List<Product>(new[] { p }));
                         nls.Add(ls);
                     }
                     variantsShops.AddRange(nls);
                 }
             }
-            List<Shop> minPathShops = null;
+            Dictionary<string, List<Product>> minPathShops = null;
             var minPathShopsDist = 0.0;
             foreach (var shops in variantsShops)
             {
-                var points = new List<Point>(shops.Select(a => a.Coordinates));
-
-                var lastPoints = new List<Point>(points);
+                var dictionary = new Dictionary<string, Point>();
+                foreach (var a in shops.Keys)
+                    dictionary.Add(a, this.Shops.Single(q => q.ID == a).Coordinates);
+                var lastPoints = new List<Point>(dictionary.Values);
                 Stack<Point> minPath = new Stack<Point>();
                 var minPathDist = 0.0;
                 var st = new Stack<Point>();
@@ -240,9 +248,12 @@ namespace TripToTheShops
 
                 rec(ref minPath, ref minPathDist, st, lastPoints);
 
-                var newOrderListShops = new List<Shop>();
+                var newOrderListShops = new Dictionary<string, List<Product>>();
                 foreach (var a in minPath.Skip(1).TakeWhile(q => q.X != 0 && q.Y != 0))
-                    newOrderListShops.Add(shops.Single(q => q.Coordinates == a));
+                {
+                    var keyValue = shops.Single(q => q.Key == dictionary.Single(z => z.Value == a).Key);
+                    newOrderListShops.Add(keyValue.Key, keyValue.Value);
+                }
 
                 if (minPathDist < minPathShopsDist || minPathShopsDist == 0.0)
                 {
@@ -251,34 +262,7 @@ namespace TripToTheShops
                 }
             }
 
-            var listProducts = new Dictionary<string, List<Product>>();
-            foreach (var s in minPathShops)
-                listProducts.Add(s.ID, planShopping.Intersect(s.Products, new ProductComparer()).ToList());
-            return listProducts;
-        }
-        /// <summary>
-        /// Получение плана покупок, оптимизирированного по дистанции до магазинов
-        /// </summary>
-        /// <param name="planShopping">список продуктов</param>
-        /// <returns>словарь, ключ которого Id магазина, а значение - список продуктов из этого магазина</returns>
-        public Dictionary<string, List<Product>> PlanMinimizeCost(Product[] planShopping)
-        {
-            var listProducts = new Dictionary<string, List<Product>>();
-            foreach (var p in planShopping)
-            {
-                var prod = Model.Current.Shops.SelectMany(q => q.Products).Where(a => a.Code == p.Code).OrderBy(q => q.Price).First();
-                if (listProducts.ContainsKey(prod.Shop.ID))
-                    listProducts[prod.Shop.ID].Add(prod);
-                else
-                    listProducts.Add(prod.Shop.ID, new List<Product>(new[] { prod }));
-            }
-            return listProducts;
-        }
-
-
-        public double GetTotalDistance(ref List<Shop> shops)
-        {
-
+            return minPathShops;
         }
 
         private void rec(ref Stack<Point> minPath, ref double minPathDist, Stack<Point> st, List<Point> lastPoints)
@@ -305,5 +289,27 @@ namespace TripToTheShops
                 }
             }
         }
+
+
+        /// <summary>
+        /// Получение плана покупок, оптимизирированного по дистанции до магазинов
+        /// </summary>
+        /// <param name="planShopping">список продуктов</param>
+        /// <returns>словарь, ключ которого Id магазина, а значение - список продуктов из этого магазина</returns>
+        public Dictionary<string, List<Product>> PlanMinimizeCost(Product[] planShopping)
+        {
+            var listProducts = new Dictionary<string, List<Product>>();
+            foreach (var p in planShopping)
+            {
+                var prod = Model.Current.Shops.SelectMany(q => q.Products).Where(a => a.Code == p.Code).OrderBy(q => q.Price).First();
+                if (listProducts.ContainsKey(prod.Shop.ID))
+                    listProducts[prod.Shop.ID].Add(prod);
+                else
+                    listProducts.Add(prod.Shop.ID, new List<Product>(new[] { prod }));
+            }
+            return listProducts;
+        }
+
+
     }
 }

@@ -10,7 +10,6 @@
 			<product code="sausage" price="150">Sausage</product>
 			<product code="bacon" price="400">Bacon</product>
 			<product code="spam" price="99.90">Spam</product>
-			<product code="qwe" price="99.90">qwe</product>
 		</products>
 	</shop>
 	<shop id="No2">
@@ -30,7 +29,6 @@
 			<product code="sausage" price="150">Sausage</product>
 			<product code="bacon" price="500">Bacon</product>
 			<product code="spam" price="49.90">Spam</product>
-			<product code="asd" price="49.90">asd</product>
 		</products>
 	</shop>
 </shops>
