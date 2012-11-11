@@ -123,7 +123,7 @@ namespace TripToTheShops
             catch (Exception e)
             {
                 AddLog(e.Message);
-                this.Shops = new Shop[]{};
+                this.Shops = new Shop[] { };
                 IsLoadShops = false;
                 return false;
             }
@@ -185,23 +185,75 @@ namespace TripToTheShops
         /// <returns>словарь, ключ которого Id магазина, а значение - список продуктов из этого магазина</returns>
         public Dictionary<string, List<Product>> PlanMinimizeDist(Product[] planShopping)
         {
-            var orderToDistShopsToHome = Model.Current.Shops.OrderBy(q => GetDistance(new Point(0, 0), q.Coordinates)).ToList();
+            //  var allshops = Model.Current.Shops.Where(a => a.Products.Intersect(planShopping, new ProductComparer()).Count() != 0);
+            //   allshops = allshops.OrderBy(a => a.Products.Intersect(planShopping, new ProductComparer()).Count());
+
+
+            var variantsShops = new List<List<Shop>>(); //new List<Dictionary<string, List<Product>>>();
             var remainingProducts = new List<Product>(planShopping);
-            var listProducts = new Dictionary<string, List<Product>>();
-            do
+            foreach (var p in planShopping)
             {
-                Shop shop = orderToDistShopsToHome.First(a => a.Products.Intersect(remainingProducts, new ProductComparer()).Count() != 0);
-                listProducts.Add(shop.ID, new List<Product>());
-                foreach (var a in shop.Products)
-                {
-                    if (remainingProducts.Contains(a, new ProductComparer()))
+
+                var shopss = Model.Current.Shops.Where(a => a.Products.Contains(p, new ProductComparer()));
+                if (variantsShops.Count > 0)
+                    for (int i = 0; i < variantsShops.Count; i++)
                     {
-                        listProducts[shop.ID].Add(a);
-                        remainingProducts.Remove(remainingProducts.Single(q => q.Code == a.Code));
+                        var s = variantsShops[i];
+                        if (s.Count(q => q.Products.Contains(p, new ProductComparer())) == 0)
+                        {
+                            var nls = new List<List<Shop>>();
+                            foreach (var a in shopss)
+                            {
+                                var ls = new List<Shop>();
+                                ls.AddRange(s);
+                                if (ls.SingleOrDefault(q => q.ID == a.ID) == null)
+                                    ls.Add(a);
+                                nls.Add(ls);
+                            }
+                            variantsShops.RemoveAt(i);
+                            variantsShops.AddRange(nls);
+                        }
                     }
+                else
+                {
+                    var nls = new List<List<Shop>>();
+                    foreach (var a in shopss)
+                    {
+                        var ls = new List<Shop>();
+                        ls.Add(a);
+                        nls.Add(ls);
+                    }
+                    variantsShops.AddRange(nls);
                 }
-                orderToDistShopsToHome.Remove(shop);
-            } while (remainingProducts.Count != 0);
+            }
+            List<Shop> minPathShops = null;
+            var minPathShopsDist = 0.0;
+            foreach (var shops in variantsShops)
+            {
+                var points = new List<Point>(shops.Select(a => a.Coordinates));
+
+                var lastPoints = new List<Point>(points);
+                Stack<Point> minPath = new Stack<Point>();
+                var minPathDist = 0.0;
+                var st = new Stack<Point>();
+                st.Push(new Point(0, 0));
+
+                rec(ref minPath, ref minPathDist, st, lastPoints);
+
+                var newOrderListShops = new List<Shop>();
+                foreach (var a in minPath.Skip(1).TakeWhile(q => q.X != 0 && q.Y != 0))
+                    newOrderListShops.Add(shops.Single(q => q.Coordinates == a));
+
+                if (minPathDist < minPathShopsDist || minPathShopsDist == 0.0)
+                {
+                    minPathShops = newOrderListShops;
+                    minPathShopsDist = minPathDist;
+                }
+            }
+
+            var listProducts = new Dictionary<string, List<Product>>();
+            foreach (var s in minPathShops)
+                listProducts.Add(s.ID, planShopping.Intersect(s.Products, new ProductComparer()).ToList());
             return listProducts;
         }
         /// <summary>
@@ -221,6 +273,37 @@ namespace TripToTheShops
                     listProducts.Add(prod.Shop.ID, new List<Product>(new[] { prod }));
             }
             return listProducts;
+        }
+
+
+        public double GetTotalDistance(ref List<Shop> shops)
+        {
+
+        }
+
+        private void rec(ref Stack<Point> minPath, ref double minPathDist, Stack<Point> st, List<Point> lastPoints)
+        {
+            if (lastPoints.Count > 0)
+                foreach (var p in lastPoints)
+                {
+                    var nst = new Stack<Point>(st.Reverse());
+                    nst.Push(p);
+                    var newLastPoints = new List<Point>(lastPoints);
+                    newLastPoints.Remove(p);
+                    rec(ref minPath, ref minPathDist, nst, newLastPoints);
+                }
+            else
+            {
+                st.Push(new Point(0, 0));
+                var total = 0.0;
+                for (var i = 0; i < st.Count - 1; i++)
+                    total += GetDistance(st.ElementAt(i), st.ElementAt(i + 1));
+                if (total < minPathDist || minPathDist == 0.0)
+                {
+                    minPath = st;
+                    minPathDist = total;
+                }
+            }
         }
     }
 }
