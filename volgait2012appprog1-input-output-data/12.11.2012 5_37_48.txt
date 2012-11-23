@@ -1,0 +1,4 @@
+12.11.2012 5:37:48 Add shop 'Food Lion'.
+12.11.2012 5:37:48 Add shop 'Bottom Dollar Food'.
+12.11.2012 5:37:48 Load shops is successful.
+12.11.2012 5:37:48 Load shoppingList is successful.

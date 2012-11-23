@@ -1,24 +1,24 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE shoppingPlan SYSTEM "shopping-plan.dtd">
 <shoppingPlan>
-	<coordinates x="50" y="50"/>
-	<totals>
-		<cost>399.9</cost>
-		<distance>900.0</distance>
-	</totals>
-	<shops>
-		<shop id="No1">
-			<name>Food Lion</name>
-			<products>
-				<product code="sausage">Sausage</product>
-				<product code="eggs">Eggs</product>
-			</products>
-		</shop>
-		<shop id="No2">
-			<name>Bottom Dollar Food</name>
-			<products>
-				<product code="spam">Spam</product>
-			</products>
-		</shop>
-	</shops>
+  <coordinates x="50" y="50" />
+  <totals>
+    <cost>399.9</cost>
+    <distance>900</distance>
+  </totals>
+  <shops>
+    <shop id="No1">
+      <name>Food Lion</name>
+      <products>
+        <product code="eggs">Eggs</product>
+        <product code="sausage">Sausage</product>
+      </products>
+    </shop>
+    <shop id="No2">
+      <name>Bottom Dollar Food</name>
+      <products>
+        <product code="spam">Spam</product>
+      </products>
+    </shop>
+  </shops>
 </shoppingPlan>
